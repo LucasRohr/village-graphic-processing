@@ -41,12 +41,6 @@ include_directories(${CMAKE_SOURCE_DIR}/include/glad)
 include_directories(${glm_SOURCE_DIR})
 include_directories(${stb_image_SOURCE_DIR})
 
-
-# Lista de exemplos/exercícios podem ser colocados aqui também
-set(EXERCISES
-    Exemplo
-)
-
 add_compile_options(-Wno-pragmas)
 
 # Define as bibliotecas para cada sistema operacional
@@ -68,9 +62,39 @@ if (NOT EXISTS ${GLAD_C_FILE})
     message(FATAL_ERROR "Arquivo glad.c não encontrado! Baixe a GLAD manualmente em https://glad.dav1d.de/ e coloque glad.h em include/glad/ e glad.c em common/")
 endif()
 
-# Cria os executáveis
-foreach(EXERCISE ${EXERCISES})
-    add_executable(${EXERCISE} src/${EXERCISE}.cpp ${GLAD_C_FILE})
-    target_include_directories(${EXERCISE} PRIVATE ${CMAKE_SOURCE_DIR}/include/glad ${glm_SOURCE_DIR} ${stb_image_SOURCE_DIR})
-    target_link_libraries(${EXERCISE} glfw ${OPENGL_LIBS})
-endforeach()
+# Fontes do trabalho (Vila Virtual). Só entram aqui os .cpp -- os .h são resolvidos
+# via #include, não precisam estar na lista. Descomentem as linhas conforme forem
+# criando os arquivos de cada frente.
+set(VILA_SOURCES
+    src/main.cpp
+    src/common/shaders.cpp
+
+    # Pessoa 1 - câmera, animação, interação e minimapa
+    # src/camera-interacao/camera.cpp
+    # src/camera-interacao/animation.cpp
+    # src/camera-interacao/interaction.cpp
+    # src/camera-interacao/minimap.cpp
+
+    # Pessoa 2 - geometria, vila, obj e textura
+    # src/geometria-vila/primitives.cpp
+    # src/geometria-vila/village.cpp
+    # src/geometria-vila/obj_loader.cpp
+    # src/geometria-vila/texture.cpp
+)
+
+# Executável único do trabalho (substitui o antigo foreach sobre EXERCISES,
+# que só compilava um arquivo solto em src/, sem subpastas)
+add_executable(VilaVirtual ${VILA_SOURCES} ${GLAD_C_FILE})
+
+# Deixa src/common, src/camera-interacao e src/geometria-vila como include paths,
+# para #include "shaders.h", #include "camera.h" etc. funcionarem sem caminho relativo
+target_include_directories(VilaVirtual PRIVATE
+    ${CMAKE_SOURCE_DIR}/include/glad
+    ${glm_SOURCE_DIR}
+    ${stb_image_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src/common
+    ${CMAKE_SOURCE_DIR}/src/camera-interacao
+    ${CMAKE_SOURCE_DIR}/src/geometria-vila
+)
+
+target_link_libraries(VilaVirtual glfw ${OPENGL_LIBS})
