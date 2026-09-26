@@ -7,9 +7,11 @@
 // Tipo de cada elemento da vila; usado tanto para instanciar quanto para decidir
 // comportamento especial (quais tipos ficam rosa com a tecla R, quais animam, etc.)
 enum TipoObjeto {
+    TERRENO,
     CASA,
     CELEIRO,
     MOINHO,
+    MOINHO_PA,
     ARVORE,
     FARDO,
     NUVEM,
