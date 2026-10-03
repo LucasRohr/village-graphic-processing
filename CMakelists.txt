@@ -63,17 +63,16 @@ if (NOT EXISTS ${GLAD_C_FILE})
 endif()
 
 # Fontes do trabalho (Vila Virtual). Só entram aqui os .cpp -- os .h são resolvidos
-# via #include, não precisam estar na lista. Descomentem as linhas conforme forem
-# criando os arquivos de cada frente.
+# via #include, não precisam estar na lista.
 set(VILA_SOURCES
     src/main.cpp
     src/common/shaders.cpp
 
     # Pessoa 1 - câmera, animação, interação e minimapa
-    # src/camera-interacao/camera.cpp
-    # src/camera-interacao/animation.cpp
-    # src/camera-interacao/interaction.cpp
-    # src/camera-interacao/minimap.cpp
+    src/camera-interacao/camera.cpp
+    src/camera-interacao/animation.cpp
+    src/camera-interacao/interaction.cpp
+    src/camera-interacao/minimap.cpp
 
     # Pessoa 2 - geometria, vila, obj e textura
     src/geometria-vila/primitives.cpp
