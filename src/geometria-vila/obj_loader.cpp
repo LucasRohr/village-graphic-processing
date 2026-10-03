@@ -51,8 +51,7 @@ GLuint carregaOBJ(const std::string& filePath, int& nVertices) {
             ss >> vt.x >> vt.y;
             texCoords.push_back(vt);
         } else if (tipo == "f") {
-            std::vector<glm::ivec2> face; // x = indice posicao, y = indice textura
-
+            // Assume face triangular (3 vértices) -- todos os modelos usados vêm assim
             std::string token;
             while (ss >> token) {
                 int vi = 0, ti = -1;
@@ -65,24 +64,15 @@ GLuint carregaOBJ(const std::string& filePath, int& nVertices) {
                     ti = !parte.empty() ? std::stoi(parte) - 1 : -1;
                 // terceiro campo (normal) é ignorado -- pipeline atual não faz iluminação
 
-                face.push_back(glm::ivec2(vi, ti));
-            }
-
-            // Triangulação em leque: funciona pra faces com 3, 4 ou mais vértices
-            for (size_t i = 1; i + 1 < face.size(); i++) {
-                glm::ivec2 tri[3] = { face[0], face[i], face[i + 1] };
-                for (int j = 0; j < 3; j++) {
-                    int vi = tri[j].x, ti = tri[j].y;
-                    vBuffer.push_back(vertices[vi].x);
-                    vBuffer.push_back(vertices[vi].y);
-                    vBuffer.push_back(vertices[vi].z);
-                    if (ti >= 0 && ti < (int)texCoords.size()) {
-                        vBuffer.push_back(texCoords[ti].x);
-                        vBuffer.push_back(texCoords[ti].y);
-                    } else {
-                        vBuffer.push_back(0.0f);
-                        vBuffer.push_back(0.0f);
-                    }
+                vBuffer.push_back(vertices[vi].x);
+                vBuffer.push_back(vertices[vi].y);
+                vBuffer.push_back(vertices[vi].z);
+                if (ti >= 0 && ti < (int)texCoords.size()) {
+                    vBuffer.push_back(texCoords[ti].x);
+                    vBuffer.push_back(texCoords[ti].y);
+                } else {
+                    vBuffer.push_back(0.0f);
+                    vBuffer.push_back(0.0f);
                 }
             }
         }
