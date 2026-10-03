@@ -78,7 +78,7 @@ set(VILA_SOURCES
     # Pessoa 2 - geometria, vila, obj e textura
     src/geometria-vila/primitives.cpp
     src/geometria-vila/village.cpp
-    # src/geometria-vila/obj_loader.cpp
+    src/geometria-vila/obj_loader.cpp
     src/geometria-vila/texture.cpp
 )
 

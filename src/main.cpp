@@ -13,10 +13,10 @@
 // #include "camera-interacao/animation.h"
 // #include "camera-interacao/interaction.h"
 // #include "camera-interacao/minimap.h"
-// #include "geometria-vila/primitives.h"
+#include "geometria-vila/primitives.h"
 #include "geometria-vila/village.h"
 #include "geometria-vila/texture.h"
-// #include "geometria-vila/obj_loader.h"
+#include "geometria-vila/obj_loader.h"
 
 GLFWwindow* Window = nullptr;
 int WIDTH = 1200;
@@ -68,6 +68,7 @@ void inicializaOpenGL() {
 void inicializaCena() {
     TexturasVila texturas = carregaTexturasVila();
     geraVila(Objetos, texturas);
+    carregaAnimais(Objetos);
 
     ShaderProgram = compilaShaderProgram(
         "../assets/shaders/vertex_shader.glsl",
