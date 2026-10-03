@@ -134,8 +134,7 @@ void loopRenderizacao() {
         glUniformMatrix4fv(glGetUniformLocation(ShaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(ShaderProgram, "proj"), 1, GL_FALSE, glm::value_ptr(proj));
 
-        // Localização do uniform que liga/desliga a cor rosa no fragment shader.
-        // OBS: só tem efeito quando o shader realmente ler esse uniform (ver aviso no chat)
+        // Localização do uniform (bool) que liga/desliga a cor rosa no fragment shader
         GLint locCorRosa = glGetUniformLocation(ShaderProgram, "usarCorRosa");
 
         for (auto& obj : Objetos) {
