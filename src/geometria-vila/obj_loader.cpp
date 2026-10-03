@@ -5,6 +5,9 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+// Idêntica à função de primitives.cpp (VAO com posição+UV
+// intercalados, stride de 5 floats) -- duplicada aqui para este arquivo não
+// depender de primitives.cpp, mantendo os dois módulos de geometria independentes
 static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
     GLuint vao, vbo;
     glGenVertexArrays(1, &vao);
@@ -25,9 +28,11 @@ static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
 }
 
 GLuint carregaOBJ(const std::string& filePath, int& nVertices) {
+    // Buffers temporários com os dados "crus" do arquivo, na ordem em que
+    // aparecem (o formato .obj referencia essas posições por índice nas faces)
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec2> texCoords;
-    std::vector<float> vBuffer;
+    std::vector<float> vBuffer; // buffer final, já no layout intercalado (posição+UV) que vai para a GPU
 
     std::ifstream arquivo(filePath);
     if (!arquivo.is_open()) {
@@ -40,33 +45,40 @@ GLuint carregaOBJ(const std::string& filePath, int& nVertices) {
     while (std::getline(arquivo, linha)) {
         std::istringstream ss(linha);
         std::string tipo;
-        ss >> tipo;
+        ss >> tipo; // primeira palavra da linha identifica o tipo de dado ("v", "vt", "f", etc.)
 
         if (tipo == "v") {
+            // Linha de posição: "v x y z"
             glm::vec3 v;
             ss >> v.x >> v.y >> v.z;
             vertices.push_back(v);
         } else if (tipo == "vt") {
+            // Linha de coordenada de textura: "vt u v"
             glm::vec2 vt;
             ss >> vt.x >> vt.y;
             texCoords.push_back(vt);
         } else if (tipo == "f") {
+            // Linha de face: "f v1/vt1 v2/vt2 v3/vt3" (índices baseados em 1, não em 0)
             // Assume face triangular (3 vértices) -- todos os modelos usados vêm assim
             std::string token;
-            while (ss >> token) {
+            while (ss >> token) { // percorre cada "v/vt" da face (3 tokens, já que a face é triangular)
                 int vi = 0, ti = -1;
                 std::istringstream tokenStream(token);
                 std::string parte;
 
+                // Separa o token pelo delimitador '/': primeira parte é o
+                // índice de posição, segunda é o índice de UV
                 if (std::getline(tokenStream, parte, '/'))
-                    vi = !parte.empty() ? std::stoi(parte) - 1 : 0;
+                    vi = !parte.empty() ? std::stoi(parte) - 1 : 0; // -1 porque o .obj indexa a partir de 1, e nossos vetores a partir de 0
                 if (std::getline(tokenStream, parte, '/'))
                     ti = !parte.empty() ? std::stoi(parte) - 1 : -1;
                 // terceiro campo (normal) é ignorado -- pipeline atual não faz iluminação
 
+                // Empacota a posição deste vértice da face no buffer final
                 vBuffer.push_back(vertices[vi].x);
                 vBuffer.push_back(vertices[vi].y);
                 vBuffer.push_back(vertices[vi].z);
+                // Empacota a UV, se a face tiver referenciado uma; senão usa (0,0) como fallback
                 if (ti >= 0 && ti < (int)texCoords.size()) {
                     vBuffer.push_back(texCoords[ti].x);
                     vBuffer.push_back(texCoords[ti].y);
@@ -76,12 +88,16 @@ GLuint carregaOBJ(const std::string& filePath, int& nVertices) {
                 }
             }
         }
+        // Outras linhas do .obj (comentários "#", normais "vn", material "usemtl"
+        // etc.) não são reconhecidas por nenhum "if" acima e são simplesmente ignoradas
     }
 
     return criaVAODeBuffer(vBuffer, nVertices);
 }
 
 void carregaAnimais(std::vector<ObjetoCena>& objetos) {
+    // Dados de cada instância de animal: de qual arquivo .obj carregar, onde
+    // posicionar, em que escala e com qual rotação em Y
     struct AnimalInfo {
         std::string objPath;
         glm::vec3 posicao;
@@ -89,8 +105,13 @@ void carregaAnimais(std::vector<ObjetoCena>& objetos) {
         float rotacaoY;
     };
 
+    // Todos os animais do pacote Cube Pets compartilham a mesma folha de
+    // textura (colormap.png), então ela é carregada uma única vez aqui fora do loop
     GLuint texturaAnimais = carregaTextura("../assets/Modelos3D/AnimaisFazenda/colormap.png");
 
+    // 3 animais: 2 vacas lado a lado (perto do celeiro 1) e 1 porco mais
+    // afastado (perto do celeiro 2); escala 0.6 reduz o modelo original pro
+    // tamanho condizente com o resto da vila
     std::vector<AnimalInfo> animais = {
         { "../assets/Modelos3D/AnimaisFazenda/animal-cow.obj",   glm::vec3(7.0f, 0.0f, -2.0f), 0.6f, 0.0f },
         { "../assets/Modelos3D/AnimaisFazenda/animal-cow.obj",   glm::vec3(8.0f, 0.0f, -2.0f), 0.6f, 0.0f },
@@ -99,8 +120,10 @@ void carregaAnimais(std::vector<ObjetoCena>& objetos) {
 
     for (auto& a : animais) {
         int nVertices;
-        GLuint vao = carregaOBJ(a.objPath, nVertices);
+        GLuint vao = carregaOBJ(a.objPath, nVertices); // um VAO por animal (modelos diferentes = geometria diferente)
 
+        // Monta o ObjetoCena manualmente aqui (em vez de reaproveitar o
+        // "adiciona" de village.cpp, que é static nesse outro arquivo e não é visível aqui)
         ObjetoCena obj;
         obj.vao = vao;
         obj.nVertices = nVertices;

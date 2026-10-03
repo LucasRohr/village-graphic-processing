@@ -6,13 +6,14 @@
 #include <string>
 #include "ObjetoCena.h"
 
-// Carrega um .obj com triangulação em leque (suporta faces com 3+ vértices) e
-// devolve o VAO pronto, com posição (vec3) + UV (vec2) intercalados -- mesmo
-// layout usado pelas primitivas, pra funcionar com o mesmo shader.
+// Lê um arquivo .obj (só posição + UV, sem normal) e cria o VAO correspondente.
+// Layout de saída igual ao de primitives.h (posição vec3 + UV vec2
+// intercalados), para funcionar com o mesmo shader da vila.
+// Assume faces já triangulares (3 vértices por "f") -- ver obj_loader.cpp
 GLuint carregaOBJ(const std::string& filePath, int& nVertices);
 
 // Carrega os modelos de animais (Cube Pets) e os adiciona à cena como
-// ObjetoCena do tipo ANIMAL, cada um com sua própria textura.
+// ObjetoCena do tipo ANIMAL, todos compartilhando a mesma textura (colormap.png)
 void carregaAnimais(std::vector<ObjetoCena>& objetos);
 
 #endif
