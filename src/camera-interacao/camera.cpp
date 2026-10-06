@@ -4,7 +4,9 @@
 
 // Estado da câmera: fica restrito a este arquivo (static) e só é acessado de
 // fora através das funções declaradas em camera.h
-static glm::vec3 Cam_pos   = glm::vec3(0.0f, 3.0f, 18.0f); // começa afastada e um pouco acima do chão, olhando para a vila
+
+// começa afastada e um pouco acima do chão, olhando para a vila
+static glm::vec3 Cam_pos   = glm::vec3(0.0f, 3.0f, 18.0f);
 static glm::vec3 Cam_front = glm::vec3(0.0f, 0.0f, -1.0f);
 static glm::vec3 Cam_up    = glm::vec3(0.0f, 1.0f, 0.0f);
 
@@ -16,13 +18,12 @@ static float Cam_speed = 6.0f;   // unidades do mundo por segundo
 static double lastX = 0.0, lastY = 0.0;
 static bool primeiroMouse = true;
 
-// Callback chamado automaticamente pela GLFW a cada movimento do mouse.
-// window = janela que gerou o evento; xpos/ypos = posição atual do cursor em
-// pixels, relativa ao canto superior esquerdo da área de desenho da janela
+// Callback chamado automaticamente pela a cada movimento do mouse.
+// xpos/ypos = posição atual do cursor em pixels
 static void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     if (primeiroMouse) {
         // Na primeira leitura ainda não existe "posição anterior" válida;
-        // só guardamos a atual como referência, sem mover a câmera neste frame
+        // só guarda a atual como referência, sem mover a câmera
         lastX = xpos;
         lastY = ypos;
         primeiroMouse = false;
@@ -33,7 +34,7 @@ static void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
     lastX = xpos;
     lastY = ypos;
 
-    float sensibilidade = 0.1f; // reduz o deslocamento bruto do mouse (em pixels) para um giro suave
+    float sensibilidade = 0.1f; // reduz o deslocamento do mouse (em pixels) para um giro suave
     xoffset *= sensibilidade;
     yoffset *= sensibilidade;
 
@@ -46,9 +47,7 @@ static void mouseCallback(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void inicializaCamera(GLFWwindow* window) {
-    // GLFW_CURSOR_DISABLED esconde o cursor do sistema operacional e permite que
-    // ele se mova indefinidamente (sem travar na borda da janela), do jeito
-    // necessário para uma câmera livre em primeira pessoa
+    // GLFW_CURSOR_DISABLED esconde o cursor do sistema operacional
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Registra mouseCallback como a função chamada pela GLFW sempre que o
@@ -79,7 +78,7 @@ void processaTecladoCamera(GLFWwindow* window, float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) Cam_pos -= Cam_right * velocidade;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) Cam_pos += Cam_right * velocidade;
 
-    // Sobe/desce no eixo Y global, independente de para onde a câmera está olhando
+    // Sobe/desce no eixo Y global com teclas E/Q, independente de para onde a câmera está olhando
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) Cam_pos.y += velocidade;
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) Cam_pos.y -= velocidade;
 }
