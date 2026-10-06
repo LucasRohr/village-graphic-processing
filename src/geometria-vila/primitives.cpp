@@ -78,9 +78,9 @@ GLuint criaVAOPlano(int& nVertices, float largura, float profundidade) {
 
 GLuint criaVAOPiramide(int& nVertices, float baseTamanho, float altura) {
     float hb = baseTamanho / 2.0f, hy = altura / 2.0f; // meio-lado da base e meia-altura
-    float bfl[3] = {-hb,-hy, hb}, bfr[3] = { hb,-hy, hb};
-    float btr[3] = { hb,-hy,-hb}, btl[3] = {-hb,-hy,-hb};
-    float ap[3]  = { 0.0f, hy, 0.0f};
+    float bfl[3] = {-hb,-hy, hb}, bfr[3] = { hb,-hy, hb}; // bfl = base front left, bfr = base front right
+    float btr[3] = { hb,-hy,-hb}, btl[3] = {-hb,-hy,-hb}; // btr = base back right, btl = base back left
+    float ap[3]  = { 0.0f, hy, 0.0f}; // ap = apex (topo da pirâmide)
 
     // As 4 primeiras linhas são as 4 faces triangulares laterais (cada uma liga
     // uma aresta da base ao ápice, com UV 0.5,1.0 no topo para convergir a

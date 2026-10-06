@@ -15,6 +15,7 @@ static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, dados.size() * sizeof(float), dados.data(), GL_STATIC_DRAW);
 
+    // Stride de 5 floats: 3 para posição + 2 para UV
     int stride = 5 * sizeof(float);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);

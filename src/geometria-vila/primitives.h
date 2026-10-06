@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 // Cada função gera VAO/VBO com posição (vec3, location 0) e UV (vec2, location 1)
-// intercalados, e devolve o total de vértices em nVertices, para uso no glDrawArrays.
+// intercalados, e devolve o total de vértices em nVertices, para uso no glDrawArrays
 
 // Cubo usado como base para casas e celeiros
 GLuint criaVAOCubo(int& nVertices, float largura = 1.0f, float altura = 1.0f, float profundidade = 1.0f);
