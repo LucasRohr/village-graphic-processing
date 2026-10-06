@@ -8,8 +8,8 @@
 float calculaAnguloPa(float tempo);
 
 // Posição animada da nuvem: desloca continuamente no eixo X a partir da posição
-// inicial e "enrola" de volta para dentro de [-limiteX, limiteX) ao sair da
-// faixa, criando um ciclo contínuo (a nuvem reaparece do lado oposto)
+// inicial e "retorna" de volta para dentro de [-limiteX, limiteX) ao sair da
+// faixa de limite, criando um ciclo (a nuvem reaparece do lado oposto, do começo)
 glm::vec3 calculaPosicaoNuvem(const glm::vec3& posInicial, float tempo, float velocidade = 0.6f, float limiteX = 18.0f);
 
 #endif

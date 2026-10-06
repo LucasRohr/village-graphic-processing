@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 // Tipo de cada elemento da vila; usado tanto para instanciar quanto para decidir
-// comportamento especial (quais tipos ficam rosa com a tecla R, quais animam, etc.)
+// comportamento especial (quais tipos ficam rosa com a tecla R, quais são animados)
 enum TipoObjeto {
     TERRENO,
     CASA,
@@ -19,6 +19,7 @@ enum TipoObjeto {
 };
 
 // Um objeto instanciado na cena: geometria (VAO) + textura + transformação.
+
 // É a struct que conecta a frente de geometria (preenche o vetor de objetos)
 // com a frente de câmera (usa os dados para desenhar a cena e o minimapa)
 struct ObjetoCena {
