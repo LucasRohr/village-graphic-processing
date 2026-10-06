@@ -16,40 +16,37 @@ GLuint carregaTextura(const std::string& filePath) {
 
     GLuint textureId = 0;
     if (data) {
-        // Escolhe o formato de cor do OpenGL de acordo com o número de canais
-        // da imagem carregada, em vez de assumir sempre RGB
+        // Escolhe o formato de cor do OpenGL de acordo com o número de canais da imagem carregada
         GLenum format = GL_RGB;
         if (nrChannels == 1) format = GL_RED;
         else if (nrChannels == 4) format = GL_RGBA;
 
         glGenTextures(1, &textureId);           // reserva 1 identificador de textura
-        glBindTexture(GL_TEXTURE_2D, textureId); // ativa essa textura; as chamadas seguintes configuram ela
+        glBindTexture(GL_TEXTURE_2D, textureId); // ativa essa textura
 
         // GL_REPEAT: se a coordenada UV passar de 1.0 ou ficar negativa, a
-        // textura se repete em ladrilhos (útil para madeira/grama cobrindo áreas maiores que 1 UV)
+        // textura se repete (útil para madeira/grama cobrindo áreas maiores)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
         // Filtro de minificação com mipmap (textura vista de longe, menor que o
         // original) interpola entre os dois níveis de mipmap mais próximos, suavizando o resultado
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         // Filtro de magnificação (textura vista de perto, maior que o original) interpola os pixels vizinhos
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        // Envia os pixels da RAM para a VRAM. Os dois parâmetros "format"
-        // (interno e de origem) são iguais aqui por simplicidade -- não há
-        // conversão de formato de cor entre a imagem e o armazenamento na GPU
+        // Envia os pixels da RAM para a VRAM
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D); // gera automaticamente as versões reduzidas (mipmaps) usadas pelo filtro acima
     } else {
         std::cerr << "Falha ao carregar textura: " << filePath << std::endl;
     }
-    stbi_image_free(data); // libera o buffer em RAM; a GPU já tem sua própria cópia dos pixels
+    stbi_image_free(data); // libera o buffer em RAM pois a GPU já tem sua própria cópia dos pixels
     return textureId;
 }
 
 TexturasVila carregaTexturasVila() {
-    // Um carregaTextura() por arquivo; o caminho "../assets/tex/..." é relativo
-    // à pasta onde o executável roda (build/), não à raiz do projeto
+    // Um carregaTextura() por arquivo
     TexturasVila tex;
     tex.madeira = carregaTextura("../assets/tex/madeira.jpg");
     tex.telhado = carregaTextura("../assets/tex/telhado.jpg");

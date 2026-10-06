@@ -3,9 +3,8 @@
 #include <cmath>
 #include <glm/glm.hpp>
 
-// Recebe um buffer já pronto (posição XYZ + UV intercalados, 5 floats por
-// vértice) e cria o VAO/VBO correspondentes na GPU. Todas as funções de
-// criaVAO* abaixo delegam para esta, então o layout de atributos é o mesmo
+// Recebe um buffer já pronto (posição XYZ + UV intercalados) e cria o VAO/VBO correspondentes na GPU. 
+// Todas as funções de criaVAO* abaixo delegam para esta, então o layout de atributos é o mesmo
 // em toda a vila (location 0 = posição, location 1 = UV)
 static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
     GLuint vao, vbo;
@@ -15,16 +14,16 @@ static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
     glGenBuffers(1, &vbo);                      // reserva 1 identificador de VBO
     glBindBuffer(GL_ARRAY_BUFFER, vbo);          // ativa o VBO como buffer de atributos de vértice
     glBufferData(GL_ARRAY_BUFFER, dados.size() * sizeof(float), dados.data(), GL_STATIC_DRAW);
-    // GL_STATIC_DRAW avisa o driver que esses dados não vão mudar depois de
-    // enviados (a geometria é fixa), o que permite otimizar onde ela fica alocada na VRAM
+
+    // GL_STATIC_DRAW avisa que esses dados não vão mudar depois de enviados (a geometria é fixa)
 
     int stride = 5 * sizeof(float); // cada vértice ocupa 5 floats: 3 de posição (X,Y,Z) + 2 de UV (S,T)
 
-    // Atributo 0 (posição): 3 floats, sem normalização, começando no byte 0 do pacote
+    // Atributo 0 (posição)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
 
-    // Atributo 1 (UV): 2 floats, offset de 3 floats (pula X,Y,Z para chegar no U)
+    // Atributo 1 (UV)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
@@ -32,14 +31,10 @@ static GLuint criaVAODeBuffer(const std::vector<float>& dados, int& nVertices) {
     return vao;
 }
 
-// Gera os 36 vértices (posição+UV) de uma caixa com meias-dimensões e offset
-// dados, sem criar VAO -- permite combinar várias caixas num único mesh (pá)
+// Gera os 36 vértices (posição+UV) de um cubo com meias-dimensões, sem criar VAO (permite combinar vários cubos num único mesh)
 static std::vector<float> verticesCubo(float hx, float hy, float hz, glm::vec3 offset) {
     // hx/hy/hz são as MEIAS dimensões (metade da largura/altura/profundidade),
-    // já que a caixa é centrada na origem e se estende de -h a +h em cada eixo.
-    // Cada face tem 2 triângulos (6 vértices); os 4 últimos números de cada
-    // linha de vértice são as coordenadas de textura (U,V), repetindo o padrão
-    // 0,0 / 1,0 / 1,1 / 0,1 (os 4 cantos de um quadrado de textura) em cada face
+    // já que o cubo é centrada na origem e se estende de -h a +h em cada eixo.
     std::vector<float> v = {
         -hx,-hy, hz, 0.0f,0.0f,  hx,-hy, hz, 1.0f,0.0f,  hx, hy, hz, 1.0f,1.0f,
          hx, hy, hz, 1.0f,1.0f, -hx, hy, hz, 0.0f,1.0f, -hx,-hy, hz, 0.0f,0.0f,
@@ -55,7 +50,7 @@ static std::vector<float> verticesCubo(float hx, float hy, float hz, glm::vec3 o
          hx, hy,-hz, 1.0f,1.0f, -hx, hy,-hz, 0.0f,1.0f, -hx, hy, hz, 0.0f,0.0f,
     };
     // Desloca todos os vértices pelo offset recebido, permitindo posicionar
-    // esta caixa em relação à origem do mesh (usado pela pá, que combina duas caixas)
+    // este cubo em relação à origem do mesh
     for (size_t i = 0; i < v.size(); i += 5) {
         v[i]   += offset.x;
         v[i+1] += offset.y;
@@ -66,15 +61,14 @@ static std::vector<float> verticesCubo(float hx, float hy, float hz, glm::vec3 o
 
 GLuint criaVAOCubo(int& nVertices, float largura, float altura, float profundidade) {
     // Converte as dimensões totais em meias-dimensões (a função verticesCubo
-    // trabalha com a caixa centrada na origem, então precisa da metade de cada eixo)
+    // trabalha com o cubo centrado na origem, então precisa da metade de cada eixo)
     std::vector<float> v = verticesCubo(largura / 2.0f, altura / 2.0f, profundidade / 2.0f, glm::vec3(0.0f));
     return criaVAODeBuffer(v, nVertices);
 }
 
 GLuint criaVAOPlano(int& nVertices, float largura, float profundidade) {
     float hx = largura / 2.0f, hz = profundidade / 2.0f; // meia-largura e meia-profundidade
-    // Um retângulo no plano XZ (Y fixo em 0.0f): 2 triângulos, 6 vértices.
-    // As UVs vão de 0 a 1 nos 4 cantos, igual às faces do cubo
+    // Um retângulo no plano XZ (Y fixo em 0)
     std::vector<float> v = {
         -hx, 0.0f,-hz, 0.0f,0.0f,  hx, 0.0f,-hz, 1.0f,0.0f,  hx, 0.0f, hz, 1.0f,1.0f,
          hx, 0.0f, hz, 1.0f,1.0f, -hx, 0.0f, hz, 0.0f,1.0f, -hx, 0.0f,-hz, 0.0f,0.0f,
@@ -84,14 +78,13 @@ GLuint criaVAOPlano(int& nVertices, float largura, float profundidade) {
 
 GLuint criaVAOPiramide(int& nVertices, float baseTamanho, float altura) {
     float hb = baseTamanho / 2.0f, hy = altura / 2.0f; // meio-lado da base e meia-altura
-    // 4 cantos da base quadrada (todos em Y = -hy, "embaixo") e o ápice (Y = +hy, "em cima")
     float bfl[3] = {-hb,-hy, hb}, bfr[3] = { hb,-hy, hb};
     float btr[3] = { hb,-hy,-hb}, btl[3] = {-hb,-hy,-hb};
     float ap[3]  = { 0.0f, hy, 0.0f};
 
     // As 4 primeiras linhas são as 4 faces triangulares laterais (cada uma liga
     // uma aresta da base ao ápice, com UV 0.5,1.0 no topo para convergir a
-    // textura no ápice); as 2 últimas linhas formam a base (2 triângulos)
+    // textura no ápice), as 2 últimas linhas formam a base (2 triângulos)
     std::vector<float> v = {
         bfl[0],bfl[1],bfl[2], 0.0f,0.0f,  bfr[0],bfr[1],bfr[2], 1.0f,0.0f,  ap[0],ap[1],ap[2], 0.5f,1.0f,
         bfr[0],bfr[1],bfr[2], 0.0f,0.0f,  btr[0],btr[1],btr[2], 1.0f,0.0f,  ap[0],ap[1],ap[2], 0.5f,1.0f,
@@ -107,27 +100,23 @@ GLuint criaVAOCilindro(int& nVertices, int segmentos, float raio, float altura) 
     std::vector<float> v;
     float yBase = -altura / 2.0f, yTopo = altura / 2.0f; // cilindro centrado verticalmente na origem
 
-    // Percorre a circunferência em "segmentos" fatias; cada fatia i vai do
-    // ângulo a0 ao ângulo a1 (em radianos, 0 a 2*PI no total)
+    // Percorre a circunferência em segmentos (ou fatias)
     for (int i = 0; i < segmentos; i++) {
-        float t0 = (float)i / segmentos, t1 = (float)(i + 1) / segmentos; // posição da fatia no intervalo [0,1]
+        float t0 = (float)i / segmentos, t1 = (float)(i + 1) / segmentos; // posição no intervalo [0,1]
         float a0 = t0 * 2.0f * (float)M_PI, a1 = t1 * 2.0f * (float)M_PI; // mesma posição em radianos
         float x0 = raio * cosf(a0), z0 = raio * sinf(a0); // ponto na borda inferior/superior no início da fatia
         float x1 = raio * cosf(a1), z1 = raio * sinf(a1); // ponto na borda no fim da fatia
 
-        // Lateral do cilindro: 2 triângulos formando um retângulo entre a base
-        // e o topo desta fatia (U = t0/t1, "desenrolando" a circunferência numa faixa de textura)
+        // Lateral do cilindro: 2 triângulos formando um retângulo entre a base e o topo
         v.insert(v.end(), { x0,yBase,z0, t0,0.0f,  x1,yBase,z1, t1,0.0f,  x1,yTopo,z1, t1,1.0f });
         v.insert(v.end(), { x0,yBase,z0, t0,0.0f,  x1,yTopo,z1, t1,1.0f,  x0,yTopo,z0, t0,1.0f });
 
-        // Tampa de baixo: triângulo ligando o centro (0,yBase,0) aos dois
-        // pontos da borda desta fatia. UV calculado projetando o ponto da
-        // borda num círculo de textura (0.5,0.5 é o centro da imagem)
+        // Tampa de baixo: triângulo ligando o centro aos dois pontos da borda desta fatia
         v.insert(v.end(), { 0.0f,yBase,0.0f, 0.5f,0.5f,
                              x1,yBase,z1, 0.5f+0.5f*cosf(a1), 0.5f+0.5f*sinf(a1),
                              x0,yBase,z0, 0.5f+0.5f*cosf(a0), 0.5f+0.5f*sinf(a0) });
 
-        // Tampa de cima: mesma ideia da tampa de baixo, centro em (0,yTopo,0)
+        // Tampa de cima: mesma ideia da tampa de baixo
         v.insert(v.end(), { 0.0f,yTopo,0.0f, 0.5f,0.5f,
                              x0,yTopo,z0, 0.5f+0.5f*cosf(a0), 0.5f+0.5f*sinf(a0),
                              x1,yTopo,z1, 0.5f+0.5f*cosf(a1), 0.5f+0.5f*sinf(a1) });
@@ -138,8 +127,6 @@ GLuint criaVAOCilindro(int& nVertices, int segmentos, float raio, float altura) 
 GLuint criaVAOPaMoinho(int& nVertices, float comprimento, float largura, float espessura) {
     float hc = comprimento / 2.0f, hl = largura / 2.0f, he = espessura / 2.0f; // meias-dimensões das tábuas
 
-    // Duas caixas sobrepostas na origem, uma "deitada" (comprida em X) e outra
-    // "em pé" (comprida em Y), formando uma cruz quando vistas de frente (plano XY) -- é a pá do moinho
     std::vector<float> v  = verticesCubo(hc, hl, he, glm::vec3(0.0f)); // tábua horizontal
     std::vector<float> v2 = verticesCubo(hl, hc, he, glm::vec3(0.0f)); // tábua vertical
     v.insert(v.end(), v2.begin(), v2.end()); // concatena as duas no mesmo buffer/mesh

@@ -6,10 +6,8 @@
 #include <string>
 #include "ObjetoCena.h"
 
-// Lê um arquivo .obj (só posição + UV, sem normal) e cria o VAO correspondente.
-// Layout de saída igual ao de primitives.h (posição vec3 + UV vec2
-// intercalados), para funcionar com o mesmo shader da vila.
-// Assume faces já triangulares (3 vértices por "f") -- ver obj_loader.cpp
+// Lê um arquivo .obj e cria o VAO correspondente.
+// Layout de saída igual ao de primitives.h (posição vec3 + UV vec2 intercalados), para funcionar com o mesmo shader da vila.
 GLuint carregaOBJ(const std::string& filePath, int& nVertices);
 
 // Carrega os modelos de animais (Cube Pets) e os adiciona à cena como
